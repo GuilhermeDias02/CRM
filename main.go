@@ -4,31 +4,37 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
-	"github.com/GuilhermeDias02/CRM/contact"
+	"github.com/GuilhermeDias02/CRM/action"
 )
 
 func main() {
 	for {
-		//Lister les contacts actuels
-		fmt.Println("\nVos contacts: ")
-		for index, val := range contact.GetContacts() {
-			fmt.Printf("\tId: %d, Name: %s, Email: %s\n", index, val.Name, val.Email)
+		action.DisplayContacts()
+
+		//Action à exécuter
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Println("\n1 - Ajouter un contact ")
+		fmt.Println("2 - Supprimer un contact ")
+		fmt.Print("Veuillez choisir une action: ")
+		actionStr, _ := reader.ReadString('\n')
+		actionStr = strings.TrimSpace(actionStr)
+		actionInt, err := strconv.Atoi(actionStr)
+
+		if err != nil {
+			fmt.Println("Action indisponible")
+			continue
 		}
 
-		//Ajouter un contact
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Println("\nAjouter un contact: ")
-
-		fmt.Print("\tQuel est son nom: ")
-		name, _ := reader.ReadString('\n')
-		name = strings.TrimSpace(name)
-
-		fmt.Print("\tQuel est son email: ")
-		email, _ := reader.ReadString('\n')
-		email = strings.TrimSpace(email)
-
-		contact.AddContact(name, email)
+		switch actionInt {
+		case 1:
+			action.AddContactForm()
+		case 2:
+			action.DeleteContactForm()
+		default:
+			fmt.Println("Action indisponible")
+		}
 	}
 }
