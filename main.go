@@ -13,8 +13,8 @@ func main() {
 	for {
 		//Lister les contacts actuels
 		fmt.Println("\nVos contacts: ")
-		for _, val := range contact.GetContacts() {
-			fmt.Printf("\tId: %d, Name: %s, Email: %s\n", val.ID, val.Name, val.Email)
+		for index, val := range contact.GetContacts() {
+			fmt.Printf("\tId: %d, Name: %s, Email: %s\n", index, val.Name, val.Email)
 		}
 
 		//Ajouter un contact
