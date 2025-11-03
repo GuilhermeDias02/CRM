@@ -56,4 +56,22 @@ func TestHandleAction_Update(t *testing.T) {
 	if called != 1 { t.Fatalf("expected update called once, got %d", called) }
 }
 
+func TestHandleAction_Quit(t *testing.T) {
+	origAdd := addContactForm
+	origDel := deleteContactForm
+	addCalled := 0
+	delCalled := 0
+	addContactForm = func() { addCalled++ }
+	deleteContactForm = func() { delCalled++ }
+	defer func() { addContactForm = origAdd; deleteContactForm = origDel }()
+
+	cont := handleAction(6)
+	if cont {
+		t.Fatalf("expected quit (false), got %v", cont)
+	}
+	if addCalled != 0 || delCalled != 0 {
+		t.Fatalf("no action should be called, got add=%d del=%d", addCalled, delCalled)
+	}
+}
+
 

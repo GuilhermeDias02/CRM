@@ -18,6 +18,7 @@ func main() {
 		fmt.Println("\n1 - Ajouter un contact ")
 		fmt.Println("2 - Supprimer un contact ")
 		fmt.Println("5 - Mettre à jour un contact ")
+		fmt.Println("6 - Quitter l'application ")
 		fmt.Print("Veuillez choisir une action: ")
 		actionStr, _ := reader.ReadString('\n')
 		actionStr = strings.TrimSpace(actionStr)
@@ -47,6 +48,9 @@ func handleAction(actionInt int) bool {
 	case 5:
 		updateContactFunc()
 		return true
+	case 6:
+		fmt.Println("Au revoir !")
+		return false
 	default:
 		fmt.Println("Action indisponible")
 		return true
