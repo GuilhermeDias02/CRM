@@ -4,13 +4,31 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
+
+	"github.com/GuilhermeDias02/CRM/contact"
 )
 
 func main() {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Votre choix: ")
+	for {
+		//Lister les contacts actuels
+		fmt.Println("\nVos contacts: ")
+		for _, val := range contact.GetContacts() {
+			fmt.Printf("\tId: %d, Name: %s, Email: %s\n", val.ID, val.Name, val.Email)
+		}
 
-	input, _ := reader.ReadString('\n')
+		//Ajouter un contact
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Println("\nAjouter un contact: ")
 
-	fmt.Println(input)
+		fmt.Print("\tQuel est son nom: ")
+		name, _ := reader.ReadString('\n')
+		name = strings.TrimSpace(name)
+
+		fmt.Print("\tQuel est son email: ")
+		email, _ := reader.ReadString('\n')
+		email = strings.TrimSpace(email)
+
+		contact.AddContact(name, email)
+	}
 }
