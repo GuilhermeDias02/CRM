@@ -1,6 +1,7 @@
 package main
 
 import (
+    "bytes"
     "testing"
 )
 
@@ -72,6 +73,45 @@ func TestHandleAction_Quit(t *testing.T) {
 	if addCalled != 0 || delCalled != 0 {
 		t.Fatalf("no action should be called, got add=%d del=%d", addCalled, delCalled)
 	}
+}
+
+func TestHandleFlags_AddSuccess(t *testing.T) {
+    contacts = map[int]Contact{}
+    nextID = 1
+
+    var out, errB bytes.Buffer
+    handled, code := handleFlags([]string{"-add", "-name", "Alice", "-email", "alice@example.com"}, &out, &errB)
+    if !handled || code != 0 {
+        t.Fatalf("expected handled=true code=0, got handled=%v code=%d, err=%q", handled, code, errB.String())
+    }
+    if len(contacts) != 1 {
+        t.Fatalf("expected 1 contact, got %d", len(contacts))
+    }
+    if !bytes.Contains(out.Bytes(), []byte("Contact ajouté avec ID")) {
+        t.Fatalf("expected success message, got %q", out.String())
+    }
+}
+
+func TestHandleFlags_MissingArgs(t *testing.T) {
+    contacts = map[int]Contact{}
+    nextID = 1
+
+    var out, errB bytes.Buffer
+    handled, code := handleFlags([]string{"-add", "-name", "Alice"}, &out, &errB)
+    if !handled || code == 0 {
+        t.Fatalf("expected handled=true error code!=0, got handled=%v code=%d", handled, code)
+    }
+}
+
+func TestHandleFlags_InvalidEmail(t *testing.T) {
+    contacts = map[int]Contact{}
+    nextID = 1
+
+    var out, errB bytes.Buffer
+    handled, code := handleFlags([]string{"-add", "-name", "Bob", "-email", "invalid"}, &out, &errB)
+    if !handled || code == 0 {
+        t.Fatalf("expected handled=true error code!=0, got handled=%v code=%d", handled, code)
+    }
 }
 
 

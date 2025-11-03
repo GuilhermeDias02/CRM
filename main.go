@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -11,6 +13,13 @@ import (
 )
 
 func main() {
+	if handled, code := handleFlags(os.Args[1:], os.Stdout, os.Stderr); handled {
+		if code != 0 {
+			os.Exit(code)
+		}
+		return
+	}
+
 	for {
 		action.DisplayContacts()
 
@@ -134,4 +143,31 @@ func readLine(prompt string) string {
 
 func isValidEmail(email string) bool {
 	return strings.Contains(email, "@")
+}
+
+func handleFlags(args []string, out io.Writer, errW io.Writer) (bool, int) {
+	fs := flag.NewFlagSet("crm", flag.ContinueOnError)
+	fs.SetOutput(errW)
+	add := fs.Bool("add", false, "Ajouter un contact via flags")
+	name := fs.String("name", "", "Nom du contact")
+	email := fs.String("email", "", "Email du contact")
+	if err := fs.Parse(args); err != nil {
+		return true, 1
+	}
+	if !*add {
+		return false, 0
+	}
+	trimName := strings.TrimSpace(*name)
+	trimEmail := strings.TrimSpace(*email)
+	if trimName == "" || trimEmail == "" {
+		fmt.Fprintln(errW, "Usage: -add -name \"Nom\" -email \"Email\"")
+		return true, 1
+	}
+	if !isValidEmail(trimEmail) {
+		fmt.Fprintln(errW, "Email invalide")
+		return true, 1
+	}
+	id := addContact(trimName, trimEmail)
+	fmt.Fprintf(out, "Contact ajouté avec ID %d\n", id)
+	return true, 0
 }
