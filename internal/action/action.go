@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GuilhermeDias02/CRM/contact"
+	"github.com/GuilhermeDias02/CRM/internal/contact"
 )
 
 func DisplayContacts() {

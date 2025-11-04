@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"bufio"
@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GuilhermeDias02/CRM/action"
+	"github.com/GuilhermeDias02/CRM/internal/action"
 )
 
-func main() {
+func App( /*storageAccess injection*/ ) {
 	if handled, code := action.HandleFlags(os.Args[1:], os.Stdout, os.Stderr); handled {
 		if code != 0 {
 			os.Exit(code)
