@@ -12,15 +12,14 @@ import (
 	"github.com/GuilhermeDias02/CRM/internal/contact"
 )
 
-func DisplayContacts() {
-	//Lister les contacts actuels
+func DisplayContacts(store contact.Storer) {
 	fmt.Println("\nVos contacts: ")
-	for index, val := range *contact.GetContacts() {
+	for index, val := range contact.GetContacts(store) {
 		fmt.Printf("\tId: %d, Name: %s, Email: %s\n", index, val.Name, val.Email)
 	}
 }
 
-func addContactForm() {
+func addContactForm(store contact.Storer) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("\nAjouter un contact: ")
 
@@ -32,17 +31,17 @@ func addContactForm() {
 	email, _ := reader.ReadString('\n')
 	email = strings.TrimSpace(email)
 
-	newContact, err := contact.NewContact(name, email)
+	saved, err := contact.NewContact(store, name, email)
 
 	if err != nil {
 		fmt.Printf("\nErreur à la création d'un nouveau contact: %s", err)
+		return
 	}
 
-	newContact.AddContact()
+	fmt.Printf("Contact ajouté avec ID %d\n", saved.Id)
 }
 
-func deleteContactForm() {
-	//Ajouter un contact
+func deleteContactForm(store contact.Storer) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("\nSupprimer un contact: ")
 
@@ -56,14 +55,8 @@ func deleteContactForm() {
 		return
 	}
 
-	contactToDelete, err := contact.GetContactById(idInt)
-
-	if err != nil {
+	if err := contact.DeleteContact(store, idInt); err != nil {
 		fmt.Printf("\nCe contact n'existe pas: %s", err)
-	}
-
-	if contactErr := contactToDelete.DeleteContact(); contactErr != nil {
-		fmt.Printf("\nCe contact n'existe pas: %s", contactErr)
 	} else {
 		fmt.Println("Contact supprimé")
 	}
@@ -80,16 +73,16 @@ func readLine(prompt string) string {
 	return strings.TrimSpace(text)
 }
 
-func HandleAction(actionInt int) bool {
+func HandleAction(store contact.Storer, actionInt int) bool {
 	switch actionInt {
 	case 1:
-		addContactForm()
+		addContactForm(store)
 		return true
 	case 2:
-		deleteContactForm()
+		deleteContactForm(store)
 		return true
 	case 3:
-		updateContactForm()
+		updateContactForm(store)
 		return true
 	case 4:
 		fmt.Println("Au revoir !")
@@ -100,8 +93,7 @@ func HandleAction(actionInt int) bool {
 	}
 }
 
-//bool true and code 0 if the contact was created
-func HandleFlags(args []string, out io.Writer, errW io.Writer) (bool, int) {
+func HandleFlags(store contact.Storer, args []string, out io.Writer, errW io.Writer) (bool, int) {
 	fs := flag.NewFlagSet("crm", flag.ContinueOnError)
 	fs.SetOutput(errW)
 	add := fs.Bool("add", false, "Ajouter un contact via flags")
@@ -120,18 +112,17 @@ func HandleFlags(args []string, out io.Writer, errW io.Writer) (bool, int) {
 		return true, 1
 	}
 	
-	newContact, err := contact.NewContact(trimName, trimEmail)
+	saved, err := contact.NewContact(store, trimName, trimEmail)
 	if err != nil {
-		fmt.Printf("\n Erreur à la création de l'utilisateur: %s", err)
+		fmt.Fprintf(errW, "\nErreur à la création de l'utilisateur: %s", err)
 		return true, 1
 	}
 
-	newContact.AddContact();
-	fmt.Fprintf(out, "Contact ajouté avec ID %d\n", newContact.Id)
+	fmt.Fprintf(out, "Contact ajouté avec ID %d\n", saved.Id)
 	return true, 0
 }
 
-func updateContactForm() {
+func updateContactForm(store contact.Storer) {
 	idStr := strings.TrimSpace(readLine("ID du contact à mettre à jour: "))
 	idInt, err := strconv.Atoi(idStr)
 	if err != nil || idInt <= 0 {
@@ -139,17 +130,10 @@ func updateContactForm() {
 		return
 	}
 
-	contactToUpdate, errContact := contact.GetContactById(idInt)
-
-	if errContact != nil {
-		fmt.Printf("Contact introuvable: %s", errContact)
-		return
-	}
-
 	name := strings.TrimSpace(readLine("Nouveau nom (laisser vide pour garder): "))
 	email := strings.TrimSpace(readLine("Nouvel email (laisser vide pour garder): "))
-	
-	if errUpdate := contactToUpdate.UpdateContact(name, email); errUpdate != nil {
+
+	if errUpdate := contact.UpdateContact(store, idInt, name, email); errUpdate != nil {
 		fmt.Printf("Erreur lors de la mise à jour du contact: %s", errUpdate)
 		return
 	}

@@ -13,15 +13,7 @@ type Contact struct {
 
 type ListeContacts = map[int]*Contact
 
-var contacts = ListeContacts{
-	1: {Id: 1, Name: "John Doe", Email: "john.doe@example.com"},
-	2: {Id: 2, Name: "Jane Doe", Email: "jane.doe@example.com"},
-}
-
-var lastId = 2
-
-//Creates a new contact
-func NewContact(name string, email string) (*Contact, error) {
+func NewContact(store Storer, name string, email string) (*Contact, error) {
 	if name == "" {
 		return nil, errors.New("le nom du contact est obligatoire")
 	}
@@ -29,63 +21,41 @@ func NewContact(name string, email string) (*Contact, error) {
 		return nil, errors.New("le mail est vide ou incorrecte")
 	}
 
-	lastId++
-	return &Contact{Id: lastId, Name: name, Email: email}, nil
-}
-
-//Add the reciever contact to the list of contacts
-func (c *Contact) AddContact() {
-	(*GetContacts())[c.Id] = c
-}
-
-//returns a pointer to the contact.contacts map
-func GetContacts() *ListeContacts {
-	return &contacts
-}
-
-func GetContactById(id int) (*Contact, error) {
-	if (id <= 0) {
-		return nil, errors.New("int must be bigger than 0")
+	newContact := &Contact{Name: name, Email: email}
+	saved, err := store.Save(newContact)
+	if err != nil {
+		return nil, err
 	}
 
-	contact, exists := (*GetContacts())[id]
-
-	if !exists {
-		return nil, errors.New("contact doesn't exist")
-	}
-
-	return contact, nil
+	return saved, nil
 }
 
-//Delete reciever contact from the list of contacts
-func (c Contact) DeleteContact() error {
-	id := c.Id
-	if _, exists := contacts[id]; exists {
-		delete(*GetContacts(), id)
-		return nil
-	}
-	return errors.New("contact doesn't exist")
+func GetContacts(store Storer) map[int]*Contact {
+	return store.GetAll()
+}
+
+func GetContactById(store Storer, id int) (*Contact, error) {
+	return store.GetByID(id)
+}
+
+func DeleteContact(store Storer, id int) error {
+	return store.Delete(id)
 }
 
 func IsValidEmail(email string) bool {
 	return strings.Contains(email, "@")
 }
 
-//Updates the contact and adds it to the list of contacts
-func (c *Contact) UpdateContact(name string, email string) error {
-	if name == "" {
-		return errors.New("invalid name")
+func UpdateContact(store Storer, id int, name string, email string) error {
+	var namePtr *string
+	var emailPtr *string
+
+	if name != "" {
+		namePtr = &name
 	}
-	if !IsValidEmail(email) {
-		return errors.New("invalid email")
+	if email != "" {
+		emailPtr = &email
 	}
 
-	id := (*c).Id
-	(*c).Name = name
-	(*c).Email = email
-
-	//ici on ajoute le nouveau contact dans le dictionnaire mais je pense que ce n'est pas forcément nécessaire sous la forme actuelle vu que c'est déjà un tableau de pointeurs
-	(*GetContacts())[id] = c
-
-	return nil
+	return store.Update(id, namePtr, emailPtr)
 }

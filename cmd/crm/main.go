@@ -1,8 +1,11 @@
 package main
 
-import "github.com/GuilhermeDias02/CRM/internal/app"
+import (
+	"github.com/GuilhermeDias02/CRM/internal/app"
+	"github.com/GuilhermeDias02/CRM/internal/contact"
+)
 
 func main() {
-	//MemoryStore
-	app.App(/*MemoryStore injection*/)
+	store := contact.NewMemoryStore()
+	app.App(store)
 }

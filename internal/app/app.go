@@ -8,20 +8,21 @@ import (
 	"strings"
 
 	"github.com/GuilhermeDias02/CRM/internal/action"
+	"github.com/GuilhermeDias02/CRM/internal/contact"
 )
 
-func App( /*MemoryStore injection*/ ) {
-	if handled, code := action.HandleFlags(os.Args[1:], os.Stdout, os.Stderr); handled {
+func App(store contact.Storer) {
+	if handled, code := action.HandleFlags(store, os.Args[1:], os.Stdout, os.Stderr); handled {
 		if code != 0 {
 			os.Exit(code)
 		}
 
-		action.DisplayContacts()
+		action.DisplayContacts(store)
 		return
 	}
 
 	for {
-		action.DisplayContacts()
+		action.DisplayContacts(store)
 
 		fmt.Println("\n1 - Ajouter un contact ")
 		fmt.Println("2 - Supprimer un contact ")
@@ -39,7 +40,7 @@ func App( /*MemoryStore injection*/ ) {
 			continue
 		}
 
-		if !action.HandleAction(actionInt) {
+		if !action.HandleAction(store, actionInt) {
 			return
 		}
 	}
