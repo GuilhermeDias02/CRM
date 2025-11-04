@@ -1,117 +1,60 @@
 package main
 
 import (
-    "bytes"
-    "testing"
+	"os"
+	"os/exec"
+	"strings"
+	"testing"
 )
 
-func TestUpdateContact_Success_NameOnly(t *testing.T) {
-	contacts = map[int]Contact{}
-	nextID = 1
-	id := addContact("Alice", "alice@example.com")
-
-	newName := "Alice Cooper"
-	if err := updateContactByID(id, &newName, nil); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	got := contacts[id]
-	if got.Name != "Alice Cooper" {
-		t.Errorf("expected name updated to 'Alice Cooper', got %q", got.Name)
-	}
-	if got.Email != "alice@example.com" {
-		t.Errorf("email should remain unchanged, got %q", got.Email)
-	}
-}
-
-func TestUpdateContact_Error_InvalidEmail(t *testing.T) {
-	contacts = map[int]Contact{}
-	nextID = 1
-	id := addContact("Bob", "bob@example.com")
-
-	badEmail := "invalid-email"
-	err := updateContactByID(id, nil, &badEmail)
-	if err == nil {
-		t.Fatalf("expected error for invalid email, got nil")
-	}
-}
-
-func TestUpdateContact_Error_UnknownID(t *testing.T) {
-	contacts = map[int]Contact{}
-	nextID = 1
-
-	newName := "Charlie"
-	err := updateContactByID(999, &newName, nil)
-	if err == nil {
-		t.Fatalf("expected error for unknown ID, got nil")
-	}
-}
-
-func TestHandleAction_Update(t *testing.T) {
-	called := 0
-	orig := updateContactFunc
-	updateContactFunc = func() { called++ }
-	defer func() { updateContactFunc = orig }()
-
-	if !handleAction(5) { t.Fatalf("expected continue for action 5") }
-	if called != 1 { t.Fatalf("expected update called once, got %d", called) }
-}
-
-func TestHandleAction_Quit(t *testing.T) {
-	origAdd := addContactForm
-	origDel := deleteContactForm
-	addCalled := 0
-	delCalled := 0
-	addContactForm = func() { addCalled++ }
-	deleteContactForm = func() { delCalled++ }
-	defer func() { addContactForm = origAdd; deleteContactForm = origDel }()
-
-	cont := handleAction(6)
-	if cont {
-		t.Fatalf("expected quit (false), got %v", cont)
-	}
-	if addCalled != 0 || delCalled != 0 {
-		t.Fatalf("no action should be called, got add=%d del=%d", addCalled, delCalled)
-	}
-}
-
-func TestHandleFlags_AddSuccess(t *testing.T) {
-    contacts = map[int]Contact{}
-    nextID = 1
-
-    var out, errB bytes.Buffer
-    handled, code := handleFlags([]string{"-add", "-name", "Alice", "-email", "alice@example.com"}, &out, &errB)
-    if !handled || code != 0 {
-        t.Fatalf("expected handled=true code=0, got handled=%v code=%d, err=%q", handled, code, errB.String())
+// helper entrypoint that invokes main() in a subprocess when GO_WANT_HELPER_PROCESS is set
+func TestInvokeMain(t *testing.T) {
+    if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
+        return
     }
-    if len(contacts) != 1 {
-        t.Fatalf("expected 1 contact, got %d", len(contacts))
+    // extract args after "--" and feed them to main via os.Args
+    sep := 0
+    for i, a := range os.Args {
+        if a == "--" { sep = i + 1; break }
     }
-    if !bytes.Contains(out.Bytes(), []byte("Contact ajouté avec ID")) {
-        t.Fatalf("expected success message, got %q", out.String())
+    if sep > 0 && sep < len(os.Args) {
+        os.Args = append([]string{os.Args[0]}, os.Args[sep:]...)
+    } else {
+        os.Args = os.Args[:1]
+    }
+    main()
+    os.Exit(0)
+}
+
+func TestMain_HandleFlagsError_ExitsWithCode(t *testing.T) {
+    // invalid email -> action.HandleFlags returns handled=true, code=1 -> main os.Exit(1)
+    args := []string{"-test.run=TestInvokeMain", "--", "-add", "-name", "Alice", "-email", "invalid"}
+    cmd := exec.Command(os.Args[0], args...)
+    cmd.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=1")
+    err := cmd.Run()
+    if err == nil {
+        t.Fatalf("expected non-zero exit status")
+    }
+    if ee, ok := err.(*exec.ExitError); ok {
+        if ee.ExitCode() == 0 {
+            t.Fatalf("expected exit code != 0, got 0")
+        }
+    } else {
+        t.Fatalf("unexpected error type: %v", err)
     }
 }
 
-func TestHandleFlags_MissingArgs(t *testing.T) {
-    contacts = map[int]Contact{}
-    nextID = 1
-
-    var out, errB bytes.Buffer
-    handled, code := handleFlags([]string{"-add", "-name", "Alice"}, &out, &errB)
-    if !handled || code == 0 {
-        t.Fatalf("expected handled=true error code!=0, got handled=%v code=%d", handled, code)
+func TestMain_HandleFlagsSuccess_DisplaysContacts(t *testing.T) {
+    // valid add -> main should print contacts and exit 0
+    args := []string{"-test.run=TestInvokeMain", "--", "-add", "-name", "Bob", "-email", "bob@example.com"}
+    cmd := exec.Command(os.Args[0], args...)
+    cmd.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=1")
+    out, err := cmd.CombinedOutput()
+    if err != nil {
+        t.Fatalf("expected exit code 0, got error: %v, output: %s", err, string(out))
+    }
+    s := string(out)
+    if !strings.Contains(s, "Vos contacts:") {
+        t.Fatalf("expected contacts to be displayed, got: %s", s)
     }
 }
-
-func TestHandleFlags_InvalidEmail(t *testing.T) {
-    contacts = map[int]Contact{}
-    nextID = 1
-
-    var out, errB bytes.Buffer
-    handled, code := handleFlags([]string{"-add", "-name", "Bob", "-email", "invalid"}, &out, &errB)
-    if !handled || code == 0 {
-        t.Fatalf("expected handled=true error code!=0, got handled=%v code=%d", handled, code)
-    }
-}
-
-
