@@ -10,7 +10,7 @@ import (
 	"github.com/GuilhermeDias02/CRM/internal/action"
 )
 
-func App( /*storageAccess injection*/ ) {
+func App( /*MemoryStore injection*/ ) {
 	if handled, code := action.HandleFlags(os.Args[1:], os.Stdout, os.Stderr); handled {
 		if code != 0 {
 			os.Exit(code)
