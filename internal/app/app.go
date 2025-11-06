@@ -11,7 +11,7 @@ import (
 	"github.com/GuilhermeDias02/CRM/internal/contact"
 )
 
-func App(store contact.Storer) {
+func Run(store contact.Storer) {
 	if handled, code := action.HandleFlags(store, os.Args[1:], os.Stdout, os.Stderr); handled {
 		if code != 0 {
 			os.Exit(code)

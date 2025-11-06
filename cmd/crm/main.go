@@ -7,5 +7,5 @@ import (
 
 func main() {
 	store := contact.NewMemoryStore()
-	app.App(store)
+	app.Run(store)
 }
