@@ -3,7 +3,6 @@ package action
 import (
 	"bytes"
 	"testing"
-
 	"github.com/GuilhermeDias02/CRM/internal/contact"
 )
 
