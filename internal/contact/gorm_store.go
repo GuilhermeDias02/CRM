@@ -13,14 +13,14 @@ type toSave struct {
 	NextID   uint              `json:"nextId"`
 }
 
-type JsonStore struct {
+type GormStore struct {
 	contacts map[uint]*Contact
 	nextID   uint
 	filePath string
 	mu       sync.RWMutex
 }
 
-func NewJsonStore(filePath string) (*JsonStore, error) {
+func NewGormStore(filePath string) (*JsonStore, error) {
 	store := &JsonStore{
 		contacts: make(map[uint]*Contact),
 		nextID:   1,
@@ -38,7 +38,7 @@ func NewJsonStore(filePath string) (*JsonStore, error) {
 	return store, nil
 }
 
-func (j *JsonStore) loadFromFile() error {
+func (j *GormStore) loadFromFile() error {
 	data, err := os.ReadFile(j.filePath)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (j *JsonStore) loadFromFile() error {
 	return nil
 }
 
-func (j *JsonStore) saveToFile() error {
+func (j *GormStore) saveToFile() error {
 	j.mu.RLock()
 	defer j.mu.RUnlock()
 
@@ -89,7 +89,7 @@ func (j *JsonStore) saveToFile() error {
 	return nil
 }
 
-func (j *JsonStore) GetAll() map[uint]*Contact {
+func (j *GormStore) GetAll() map[uint]*Contact {
 	j.mu.RLock()
 	defer j.mu.RUnlock()
 
@@ -100,7 +100,7 @@ func (j *JsonStore) GetAll() map[uint]*Contact {
 	return result
 }
 
-func (j *JsonStore) GetByID(id uint) (*Contact, error) {
+func (j *GormStore) GetByID(id uint) (*Contact, error) {
 	if id <= 0 {
 		return nil, errors.New("ID must be greater than 0")
 	}
@@ -115,7 +115,7 @@ func (j *JsonStore) GetByID(id uint) (*Contact, error) {
 	return c, nil
 }
 
-func (j *JsonStore) Save(c *Contact) (*Contact, error) {
+func (j *GormStore) Save(c *Contact) (*Contact, error) {
 	if c.Name == "" {
 		return nil, errors.New("le nom du contact est obligatoire")
 	}
@@ -139,7 +139,7 @@ func (j *JsonStore) Save(c *Contact) (*Contact, error) {
 	return c, nil
 }
 
-func (j *JsonStore) Update(id uint, name *string, email *string) error {
+func (j *GormStore) Update(id uint, name *string, email *string) error {
 	if id <= 0 {
 		return errors.New("ID must be greater than 0")
 	}
@@ -175,7 +175,7 @@ func (j *JsonStore) Update(id uint, name *string, email *string) error {
 	return nil
 }
 
-func (j *JsonStore) Delete(id uint) error {
+func (j *GormStore) Delete(id uint) error {
 	if id <= 0 {
 		return errors.New("ID must be greater than 0")
 	}

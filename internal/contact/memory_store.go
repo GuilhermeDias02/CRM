@@ -6,30 +6,30 @@ import (
 )
 
 type MemoryStore struct {
-	contacts map[int]*Contact
-	nextID   int
+	contacts map[uint]*Contact
+	nextID   uint
 	mu       sync.RWMutex
 }
 
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
-		contacts: make(map[int]*Contact),
+		contacts: make(map[uint]*Contact),
 		nextID:   1,
 	}
 }
 
-func (m *MemoryStore) GetAll() map[int]*Contact {
+func (m *MemoryStore) GetAll() map[uint]*Contact {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	result := make(map[int]*Contact)
+	result := make(map[uint]*Contact)
 	for k, v := range m.contacts {
 		result[k] = v
 	}
 	return result
 }
 
-func (m *MemoryStore) GetByID(id int) (*Contact, error) {
+func (m *MemoryStore) GetByID(id uint) (*Contact, error) {
 	if id <= 0 {
 		return nil, errors.New("ID must be greater than 0")
 	}
@@ -64,7 +64,7 @@ func (m *MemoryStore) Save(c *Contact) (*Contact, error) {
 	return c, nil
 }
 
-func (m *MemoryStore) Update(id int, name *string, email *string) error {
+func (m *MemoryStore) Update(id uint, name *string, email *string) error {
 	if id <= 0 {
 		return errors.New("ID must be greater than 0")
 	}
@@ -93,7 +93,7 @@ func (m *MemoryStore) Update(id int, name *string, email *string) error {
 	return nil
 }
 
-func (m *MemoryStore) Delete(id int) error {
+func (m *MemoryStore) Delete(id uint) error {
 	if id <= 0 {
 		return errors.New("ID must be greater than 0")
 	}
