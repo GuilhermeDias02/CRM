@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	deleteID int
+	deleteID uint
 )
 
 var deleteCmd = &cobra.Command{
@@ -21,7 +21,7 @@ var deleteCmd = &cobra.Command{
 	Long: `La commande 'delete' permet de supprimer un contact existant par son ID.
 L'ID peut être fourni via le flag --id ou demandé de manière interactive.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var id int
+		var id uint
 
 		if deleteID > 0 {
 			id = deleteID
@@ -33,7 +33,8 @@ L'ID peut être fourni via le flag --id ou demandé de manière interactive.`,
 			fmt.Print("\tQuel est son id: ")
 			idStr, _ := reader.ReadString('\n')
 			idStr = strings.TrimSpace(idStr)
-			idInt, err := strconv.Atoi(idStr)
+			idParsed, err := strconv.Atoi(idStr)
+			idInt := uint(idParsed)
 
 			if err != nil {
 				fmt.Println("\nL'id selectionné n'est pas un numéro")
@@ -54,7 +55,7 @@ func init() {
 	rootCmd.AddCommand(deleteCmd)
 
 	// Définition des drapeaux pour la commande 'delete'
-	deleteCmd.Flags().IntVarP(&deleteID, "id", "i", 0, "ID du contact à supprimer")
+	deleteCmd.Flags().UintVarP(&deleteID, "id", "i", 0, "ID du contact à supprimer")
 }
 
 

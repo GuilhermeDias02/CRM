@@ -48,7 +48,8 @@ func deleteContactForm(store contact.Storer) {
 	fmt.Print("\tQuel est son id: ")
 	idStr, _ := reader.ReadString('\n')
 	idStr = strings.TrimSpace(idStr)
-	idInt, err := strconv.Atoi(idStr)
+	idParsed, err := strconv.Atoi(idStr)
+	idInt := uint(idParsed)
 
 	if err != nil {
 		fmt.Println("\nL'id selectionné n'est pas un numéro")
@@ -124,7 +125,8 @@ func HandleFlags(store contact.Storer, args []string, out io.Writer, errW io.Wri
 
 func updateContactForm(store contact.Storer) {
 	idStr := strings.TrimSpace(readLine("ID du contact à mettre à jour: "))
-	idInt, err := strconv.Atoi(idStr)
+	idParsed, err := strconv.Atoi(idStr)
+	idInt := uint(idParsed)
 	if err != nil || idInt <= 0 {
 		fmt.Println("ID invalide")
 		return

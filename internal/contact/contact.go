@@ -11,7 +11,7 @@ type Contact struct {
 	Email string `gorm:"not null;size:100"`
 }
 
-type ListeContacts = map[int]*Contact
+type ListeContacts = map[uint]*Contact
 
 func NewContact(store Storer, name string, email string) (*Contact, error) {
 	if name == "" {
@@ -30,15 +30,15 @@ func NewContact(store Storer, name string, email string) (*Contact, error) {
 	return saved, nil
 }
 
-func GetContacts(store Storer) map[int]*Contact {
+func GetContacts(store Storer) map[uint]*Contact {
 	return store.GetAll()
 }
 
-func GetContactById(store Storer, id int) (*Contact, error) {
+func GetContactById(store Storer, id uint) (*Contact, error) {
 	return store.GetByID(id)
 }
 
-func DeleteContact(store Storer, id int) error {
+func DeleteContact(store Storer, id uint) error {
 	return store.Delete(id)
 }
 
@@ -46,7 +46,7 @@ func IsValidEmail(email string) bool {
 	return strings.Contains(email, "@")
 }
 
-func UpdateContact(store Storer, id int, name string, email string) error {
+func UpdateContact(store Storer, id uint, name string, email string) error {
 	var namePtr *string
 	var emailPtr *string
 

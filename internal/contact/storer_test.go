@@ -8,26 +8,26 @@ import (
 // mockStorer est une implémentation de test de l'interface Storer
 // pour valider que l'interface est correctement définie et utilisable.
 type mockStorer struct {
-	contacts map[int]*Contact
-	nextID   int
+	contacts map[uint]*Contact
+	nextID   uint
 }
 
 func newMockStorer() *mockStorer {
 	return &mockStorer{
-		contacts: make(map[int]*Contact),
+		contacts: make(map[uint]*Contact),
 		nextID:   1,
 	}
 }
 
-func (m *mockStorer) GetAll() map[int]*Contact {
-	result := make(map[int]*Contact)
+func (m *mockStorer) GetAll() map[uint]*Contact {
+	result := make(map[uint]*Contact)
 	for k, v := range m.contacts {
 		result[k] = v
 	}
 	return result
 }
 
-func (m *mockStorer) GetByID(id int) (*Contact, error) {
+func (m *mockStorer) GetByID(id uint) (*Contact, error) {
 	if id <= 0 {
 		return nil, errors.New("ID must be greater than 0")
 	}
@@ -53,7 +53,7 @@ func (m *mockStorer) Save(c *Contact) (*Contact, error) {
 	return c, nil
 }
 
-func (m *mockStorer) Update(id int, name *string, email *string) error {
+func (m *mockStorer) Update(id uint, name *string, email *string) error {
 	if id <= 0 {
 		return errors.New("ID must be greater than 0")
 	}
@@ -76,7 +76,7 @@ func (m *mockStorer) Update(id int, name *string, email *string) error {
 	return nil
 }
 
-func (m *mockStorer) Delete(id int) error {
+func (m *mockStorer) Delete(id uint) error {
 	if id <= 0 {
 		return errors.New("ID must be greater than 0")
 	}

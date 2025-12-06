@@ -79,10 +79,7 @@ func TestMemoryStore_GetByID_InvalidID(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for ID 0")
 	}
-	_, err = store.GetByID(-1)
-	if err == nil {
-		t.Fatalf("expected error for negative ID")
-	}
+	// Cannot use negative integer as uint argument; instead, test with another invalid value if needed.
 }
 
 // TestMemoryStore_Save_GeneratesID vérifie que Save génère un ID si Contact.Id == 0.
@@ -270,11 +267,7 @@ func TestMemoryStore_Delete_Errors(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for ID 0")
 	}
-
-	err = store.Delete(-1)
-	if err == nil {
-		t.Fatalf("expected error for negative ID")
-	}
+	// Cannot test negative IDs since store.Delete expects a uint
 }
 
 // TestMemoryStore_Delete_DoesNotReuseID vérifie que les IDs ne sont pas réutilisés après suppression.

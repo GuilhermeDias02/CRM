@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	updateID    int
+	updateID    uint
 	updateName  string
 	updateEmail string
 )
@@ -24,7 +24,7 @@ var updateCmd = &cobra.Command{
 L'ID du contact est obligatoire. Si les flags --name et --email ne sont pas fournis,
 le mode interactif sera activé.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var id int
+		var id uint
 		var name, email string
 
 		// Récupérer l'ID
@@ -33,7 +33,8 @@ le mode interactif sera activé.`,
 		} else {
 			// Mode interactif pour l'ID
 			idStr := strings.TrimSpace(readLine("ID du contact à mettre à jour: "))
-			idInt, err := strconv.Atoi(idStr)
+			idParsed, err := strconv.Atoi(idStr)
+			idInt := uint(idParsed)
 			if err != nil || idInt <= 0 {
 				fmt.Println("ID invalide")
 				os.Exit(1)
@@ -74,7 +75,7 @@ func init() {
 	rootCmd.AddCommand(updateCmd)
 
 	// Définition des drapeaux pour la commande 'update'
-	updateCmd.Flags().IntVarP(&updateID, "id", "i", 0, "ID du contact à mettre à jour")
+	updateCmd.Flags().UintVarP(&updateID, "id", "i", 0, "ID du contact à mettre à jour")
 	updateCmd.Flags().StringVarP(&updateName, "name", "n", "", "Nouveau nom du contact")
 	updateCmd.Flags().StringVarP(&updateEmail, "email", "e", "", "Nouvel email du contact")
 }

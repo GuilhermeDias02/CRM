@@ -1,14 +1,13 @@
 package contact
 
 type Storer interface {
-	GetAll() map[int]*Contact
+	GetAll() map[uint]*Contact
 
-	GetByID(id int) (*Contact, error)
+	GetByID(id uint) (*Contact, error)
 
 	Save(*Contact) (*Contact, error)
 
-	Update(id int, name *string, email *string) error
+	Update(id uint, name *string, email *string) error
 
-	Delete(id int) error
+	Delete(id uint) error
 }
-
