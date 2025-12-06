@@ -1,0 +1,10 @@
+{
+  "contacts": {
+    "1": {
+      "Id": 1,
+      "Name": "John Doe",
+      "Email": "john.doe@email.com"
+    }
+  },
+  "nextId": 2
+}

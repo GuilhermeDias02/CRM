@@ -21,17 +21,8 @@ permettant de gérer une liste de contacts avec les opérations CRUD de base.`,
 	},
 }
 
-func init() {
-	// Initialiser le store avec persistance fichier
-	fileStore, err := contact.NewFileStore("")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Erreur lors de l'initialisation du store: %v\n", err)
-		os.Exit(1)
-	}
-	store = fileStore
-}
-
-func Execute() {
+func Execute(storer contact.Storer) {
+	store = storer
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
