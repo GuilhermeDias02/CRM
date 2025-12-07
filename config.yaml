@@ -1,0 +1,13 @@
+# Configuration du CRM
+# Type de storer à utiliser : "memory", "json", ou "gorm"
+storer:
+  type: "gorm"  # Options: "memory", "json", "gorm"
+  
+  # Configuration pour le storer JSON (nécessaire si type = "json")
+  json:
+    file_path: "contacts.json"
+  
+  # Configuration pour le storer GORM (nécessaire si type = "gorm")
+  gorm:
+    db_path: "contacts.db"
+
